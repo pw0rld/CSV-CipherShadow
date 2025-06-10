@@ -166,13 +166,13 @@ def analyze_all_pages(bin_path, page_size=4096):
         md5sum = hashlib.md5(feature_bytes).hexdigest()
         page_md5s.append(md5sum)
     
-    # Print the offset of each feature value
-    print("\nFeature value corresponding to program offset:")
-    for feature_id, offsets in sorted(feature_offsets.items()):
-        if offsets:  # Only print the feature value with duplicate blocks
-            print(f"\nFeature {feature_id}:")
-            for offset in offsets:
-                print(f"   Offset: 0x{offset:x}")
+    # # Print the offset of each feature value
+    # print("\nFeature value corresponding to program offset:")
+    # for feature_id, offsets in sorted(feature_offsets.items()):
+    #     if offsets:  # Only print the feature value with duplicate blocks
+    #         print(f"\nFeature {feature_id}:")
+    #         for offset in offsets:
+    #             print(f"   Offset: 0x{offset:x}")
     
     return page_md5s
 
@@ -258,12 +258,16 @@ def analyze_multi_programs_md5_stats(bin_paths, page_size=4096):
 
 # Example usage
 if __name__ == "__main__":
-    bin_paths = [
-        "/home/pw0rld/security-25/sshd",
-        "/usr/sbin/nginx",
-        "/usr/bin/mysql",
-        "/usr/bin/qemu-system-x86_64"
-    ]
-    stats = analyze_multi_programs_md5_stats(bin_paths)
-    for stat in stats:
-        print(stat)
+    # bin_paths = [
+    #     "/home/pw0rld/security-25/sshd",
+    #     "/usr/sbin/nginx",
+    #     "/usr/bin/mysql",
+    #     "/usr/bin/qemu-system-x86_64"
+    # ]
+    # stats = analyze_multi_programs_md5_stats(bin_paths)
+    # for stat in stats:
+    #     print(stat)
+    bin_path = "/home/pw0rld/security-25/sshd"
+    page_size = 4096
+    md5s = analyze_all_pages(bin_path, page_size)
+    print(md5s)

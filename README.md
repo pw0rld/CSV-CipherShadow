@@ -101,42 +101,6 @@ cd /tmp && unzip guest_kernel.zip && cd x86_64
 rpm -ivh *.rpm --force --nodeps
 ```
 
-## VM Launch Commands
-
-### CSV v1
-```bash
-qemu-system-x86_64 \
-    -enable-kvm \
-    -cpu host \
-    -smp 1 \
-    -m 4096M,slots=5,maxmem=30G -no-reboot \
-    -drive if=pflash,format=raw,unit=0,file=OVMF_code.fd,readonly=on \
-    -hda vm0.qcow2 \
-    -net user,hostfwd=tcp:127.0.0.1:2221-0.0.0.0:22 \
-    -net nic -nographic \
-    -object sev-guest,id=sev0,policy=0x1,cbitpos=47,reduced-phys-bits=5 \
-    -monitor telnet:127.0.0.1:5551,server,nowait \
-    -qmp tcp::5551,server,nowait \
-    -machine memory-encryption=sev0
-```
-
-### CSV v2/v3
-```bash
-qemu-system-x86_64 \
-    -enable-kvm \
-    -cpu host \
-    -smp 1 \
-    -m 4096M,slots=5,maxmem=30G -no-reboot \
-    -drive if=pflash,format=raw,unit=0,file="$OVMF_PATH",readonly=on \
-    -hda vm0.qcow2 \
-    -net user,hostfwd=tcp:127.0.0.1:2221-0.0.0.0:22 \
-    -net nic -nographic \
-    -object sev-guest,id=sev0,policy=0x5,cbitpos=47,reduced-phys-bits=5 \
-    -monitor telnet:127.0.0.1:5551,server,nowait \
-    -qmp tcp::5551,server,nowait \
-    -machine memory-encryption=sev0
-```
-
 ## Contributing
 
 We welcome contributions from the security community! Please review our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
