@@ -13,7 +13,7 @@ def get_page_md5(gpa):
     pattern = re.compile(r'kvm_amd: gpa (0x[0-9a-f]+), group (\d+), feature_sum = (\d+)')
     features = []
     # ./weepoc getfeature 0x000000010bca1000
-    cmd = "sudo ./weepoc getfeature {}".format(gpa)
+    cmd = "sudo ./poc getfeature {}".format(gpa)
     os.system(cmd)
     with subprocess.Popen(['dmesg', '--follow'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=1) as process:
         try:

@@ -17,6 +17,7 @@
 #include <sys/time.h>
 
 #ifndef KVM_COPY_16BYTE_GPA
+#define KVM_PAGE_FAULT_CSV             _IO(KVMIO,   0x19)
 #define KVM_COPY_16BYTE_GPA   _IOW(0xAE, 0x17, struct kvm_copy_16byte_gpa_param)
 struct kvm_copy_16byte_gpa_param {
 	__u64 dst_gpa;
@@ -41,10 +42,10 @@ uint64_t kernel_base_phys;
 uint64_t kernel_page_offset_virt;
 uint64_t init_top_pgt_cr3;
 
-uint64_t open_kvm_vc_81(int fd) {
+uint64_t open_kvm_page_fault(int fd) {
     int result;
-    printf("[+]opening kvm vc 81, KVM_VC_OPEN_81 0x%x\n", KVM_VC_OPEN_81);
-    result = ioctl(fd, KVM_VC_OPEN_81);
+    printf("[+]opening kvm page fault, KVM_PAGE_FAULT_CSV 0x%x\n", KVM_PAGE_FAULT_CSV);
+    result = ioctl(fd, KVM_PAGE_FAULT_CSV);
     printf("result: %d\n", result);
     return result;
 }
@@ -84,8 +85,8 @@ int single_step_page(int fd, uint64_t dst_gpa, uint64_t single_pic_interval) {
 void print_help(const char *progname) {
     printf("Usage: %s <command> [arguments...]\n", progname);
     printf("Supported commands:\n");
-    printf("  vc81\n");
-    printf("      Open KVM VC 81 interface.\n");
+    printf("  pagefault\n");
+    printf("      Open KVM page fault interface.\n");
     printf("  getfeature <gpa>\n");
     printf("      Query the ciphertext feature of the specified GPA (Guest Physical Address).\n");
     printf("      Example: %s getfeature 0x12345678\n", progname);
@@ -112,8 +113,8 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    if(strcmp(argv[1], "vc81") == 0) {
-        open_kvm_vc_81(fd);
+    if(strcmp(argv[1], "pagefault") == 0) {
+        open_kvm_page_fault(fd);
     }
     else if (strcmp(argv[1], "getfeature") == 0) {
         if (argc != 3) {

