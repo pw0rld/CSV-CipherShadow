@@ -44,6 +44,14 @@ def get_page_md5(gpa):
     # Calculate md5
     feature_bytes = ','.join(str(f) for f in features).encode('utf-8')
     md5sum = hashlib.md5(feature_bytes).hexdigest()
+    if md5sum == "79bdda39f48c484c47751869c735b2a6":
+        print(f"Page {gpa} Feature sequence MD5: {md5sum}")
+        base_addr = int(gpa, 16)
+        offset = 0x300
+        target_addr = base_addr + offset
+        print(f"Calculated target address: {gpa} + 0x{offset:x} = 0x{target_addr:x}")
+        print(f"Addresses to replace: 0x{target_addr:x} and 0x{target_addr + 0x10:x}")
+        print("")
     with open("md5.txt", "a") as f:
         f.write(f'Page {gpa} Feature sequence MD5: {md5sum}\n')
     os.system("dmesg -c")

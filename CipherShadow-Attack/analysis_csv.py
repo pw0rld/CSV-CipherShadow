@@ -141,46 +141,46 @@ def auto_pagefault_stat(count=10):
             
         return frequent_pages  # return the list of frequent page addresses
 
-def get_page_md5(gpa):
-    # regex match the line like 'kvm_amd: gpa 0x10e010000, group 0, feature_sum = 0'
-    pattern = re.compile(r'kvm_amd: gpa (0x[0-9a-f]+), group (\d+), feature_sum = (\d+)')
-    # store the feature values
-    features = []
-    # start listening dmesg
-    # ./weepoc getfeature 0x000000010bca1000
-    cmd = "sudo ./weepoc getfeature {}".format(gpa)
-    os.system(cmd)
-    with subprocess.Popen(['dmesg', '--follow'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=1) as process:
-        try:
-            while True:
-                line = process.stdout.readline()
-                if not line:
-                    break
-                match = pattern.search(line)
-                if match:
-                    extracted_gpa = match.group(1)
-                    # compare the gpa
-                    if extracted_gpa != gpa:
-                        print(f"gpa not match: {extracted_gpa} != {gpa}")
-                        continue
-                    group = int(match.group(2))
-                    feature_sum = int(match.group(3))
-                    features.append(feature_sum)
-                    if len(features) >= 64:
-                        process.terminate()
-                        break
-        except KeyboardInterrupt:
-            print("user interrupt, exit...")
-            process.terminate()
-    # ensure the number of features is 64
-    if len(features) < 64:
-        features.extend([0] * (64 - len(features)))
-    else:
-        features = features[:64]
-    # calculate md5
-    feature_bytes = ','.join(str(f) for f in features).encode('utf-8')
-    md5sum = hashlib.md5(feature_bytes).hexdigest()
-    return md5sum
+# def get_page_md5(gpa):
+#     # regex match the line like 'kvm_amd: gpa 0x10e010000, group 0, feature_sum = 0'
+#     pattern = re.compile(r'kvm_amd: gpa (0x[0-9a-f]+), group (\d+), feature_sum = (\d+)')
+#     # store the feature values
+#     features = []
+#     # start listening dmesg
+#     # ./weepoc getfeature 0x000000010bca1000
+#     cmd = "sudo ./weepoc getfeature {}".format(gpa)
+#     os.system(cmd)
+#     with subprocess.Popen(['dmesg', '--follow'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, bufsize=1) as process:
+#         try:
+#             while True:
+#                 line = process.stdout.readline()
+#                 if not line:
+#                     break
+#                 match = pattern.search(line)
+#                 if match:
+#                     extracted_gpa = match.group(1)
+#                     # compare the gpa
+#                     if extracted_gpa != gpa:
+#                         print(f"gpa not match: {extracted_gpa} != {gpa}")
+#                         continue
+#                     group = int(match.group(2))
+#                     feature_sum = int(match.group(3))
+#                     features.append(feature_sum)
+#                     if len(features) >= 64:
+#                         process.terminate()
+#                         break
+#         except KeyboardInterrupt:
+#             print("user interrupt, exit...")
+#             process.terminate()
+#     # ensure the number of features is 64
+#     if len(features) < 64:
+#         features.extend([0] * (64 - len(features)))
+#     else:
+#         features = features[:64]
+#     # calculate md5
+#     feature_bytes = ','.join(str(f) for f in features).encode('utf-8')
+#     md5sum = hashlib.md5(feature_bytes).hexdigest()
+#     return md5sum
 
 def analyze_binary_cacheline_features(bin_path, page_size=4096):
     page_md5s = []
@@ -260,7 +260,7 @@ if __name__ == '__main__':
     # page_md5s = analyze_binary_cacheline_features(bin_path)
     # print(page_md5s)
     # attack_stat("0x6333000",0x6f0,2,1,-1)
-
+    locat_page()
     # print(frequent_pages)
     # from get_feature import get_page_md5
     # for gpa in frequent_pages:

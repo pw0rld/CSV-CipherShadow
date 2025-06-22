@@ -21,7 +21,7 @@ Our experiments were conducted on the following platforms:
 ```bash
 git clone https://gitee.com/anolis/hygon-qemu.git && cd hygon-qemu/
 sed -i 's/bpf_program__set_socket_filter(/bpf_program__attach(/g' ./ebpf/ebpf_rss.c
-./configure --target-list=x86_64-softmmu --enable-kvm --enable-virtfs \
+./configure --target-list=x86_64-softmmu --enable-kvm --enable-virtfs --disable-werror \
     --enable-cmd-batch --prefix=/usr --sysconfdir=/etc --localstatedir=/var
 make CFLAGS="-Werror=nested-externs -Werror=implicit-function-declaration" -j$(nproc)
 ```
@@ -90,7 +90,7 @@ Expected output should show:
 - Security status
 - Guest count
 
-## Victim System Setup
+## 5.Victim System Setup
 
 1. Execute the provided `make_vm_img.sh` script
 2. For CSV v2 and v3, install the modified VM kernel:
@@ -99,6 +99,13 @@ scp -P 2221 -r guest_kernel.zip root@127.0.0.1:/tmp
 ssh root@127.0.0.1 -p 2221
 cd /tmp && unzip guest_kernel.zip && cd x86_64
 rpm -ivh *.rpm --force --nodeps
+```
+
+## 6. Add CErt
+```
+git clone --depth 1 https://gitee.com/anolis/hygon-devkit.git
+sudo ./hygon-devkit/common/install/install_hag.sh
+sudo /opt/hygon/bin/hag general hgsc_import
 ```
 
 ## Contributing
