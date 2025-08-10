@@ -53,7 +53,7 @@ elif [ $SECRET_MODE -eq 2 ]; then
     -drive if=pflash,format=raw,unit=0,file="$OVMF_PATH",readonly=on \
     -hda "$DISK_IMAGE" -net nic \
     -machine memory-encryption=sev0 \
-    -object sev-guest,id=sev0,policy=0x5,cbitpos=47,reduced-phys-bits=5  \
+    -object sev-guest,id=sev0,policy=0x1,cbitpos=47,reduced-phys-bits=5  \
     -nographic -monitor pty -monitor unix:monitor,server,nowait \
     -net user,hostfwd=tcp:127.0.0.1:2221-0.0.0.0:22   \
     # -monitor telnet:127.0.0.1:5551,server,nowait   \
