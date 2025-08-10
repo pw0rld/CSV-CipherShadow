@@ -1,4 +1,4 @@
-# CSV-CipherShadow
+# CipherShadow
 
 This repository contains the experimental code and case studies presented in our paper:
 
@@ -15,7 +15,7 @@ Our experiments were conducted on the following platforms:
 - Hygon C86 5285 16-core Processor (CSV v1)
 - Hygon C86 7490 32-core Processor (CSV v3)
 
-## Setup Instructions
+## Setup
 
 ### 1. QEMU Setup
 ```bash
@@ -101,14 +101,17 @@ cd /tmp && unzip guest_kernel.zip && cd x86_64
 rpm -ivh *.rpm --force --nodeps
 ```
 
-## Contributing
+## Attacks
+- CipherShadow contains the CipherShadow attack targeting the memory encryption mechanism within Hygon CSVs.
 
-We welcome contributions from the security community! Please review our [Contributing Guidelines](CONTRIBUTING.md) before submitting pull requests.
+
+- SEV_Attack_PoC directory contains minimal PoC verifications for testing the root cause of known SEV vulnerabilities on Hygon CSVs.
+
+<!-- ## Citation -->
+
+
 
 ## Disclaimer
 
 This tool is provided for educational and research purposes only. The authors are not responsible for any misuse or damage caused by this program.
 
-## Contact
-
-[Your contact information]
